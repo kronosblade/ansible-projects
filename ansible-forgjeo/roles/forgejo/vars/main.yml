@@ -1,0 +1,5 @@
+---
+forgejo_version: "14.0.4"
+forgejo_base_url: "https://codeberg.org/forgejo/forgejo/releases/download"
+forgejo_binary_url: "{{ forgejo_base_url }}/v{{ forgejo_version }}/forgejo-{{ forgejo_version }}-linux-amd64"
+forgejo_install_path: "/usr/local/bin/forgejo"

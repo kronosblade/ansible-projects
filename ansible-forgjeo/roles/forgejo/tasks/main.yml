@@ -1,0 +1,17 @@
+---
+- name: Download Forgejo binary
+  get_url:
+    url: "{{ forgejo_binary_url }}"
+    dest: "{{ forgejo_install_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Verify Forgejo binary
+  command: "{{ forgejo_install_path }} --version"
+  register: forgejo_version_check
+  changed_when: false
+
+- name: Show Forgejo version
+  debug:
+    msg: "{{ forgejo_version_check.stdout }}"

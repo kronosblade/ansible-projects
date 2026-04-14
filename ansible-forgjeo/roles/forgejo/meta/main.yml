@@ -1,0 +1,8 @@
+---
+galaxy_info:
+  role_name: forgejo
+  description: Download and install Forgejo binary on Debian servers
+  platforms:
+    - name: Debian
+      versions:
+        - all
