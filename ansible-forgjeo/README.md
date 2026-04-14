@@ -84,7 +84,7 @@ Hardening del server tramite fail2ban e unattended-upgrades.
 3. **Abilita e avvia fail2ban**: avvia il demone e lo abilita all'avvio del sistema.
 4. **Verifica lo stato**: esegue `fail2ban-client status` e mostra l'output per confermare che il servizio è attivo e le jail sono caricate.
 
-**unattended-upgrades** -> aggiornamenti di sicurezza automatici:
+**unattended-upgrades**: aggiornamenti di sicurezza automatici:
 
 1. **Installa unattended-upgrades**: installa il pacchetto tramite apt.
 2. **Abilita la configurazione**: esegue `dpkg-reconfigure` per attivare gli aggiornamenti automatici.
