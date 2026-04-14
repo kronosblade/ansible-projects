@@ -1,0 +1,8 @@
+---
+galaxy_info:
+  role_name: fail2ban
+  description: Install and configure fail2ban on Debian servers
+  platforms:
+    - name: Debian
+      versions:
+        - all

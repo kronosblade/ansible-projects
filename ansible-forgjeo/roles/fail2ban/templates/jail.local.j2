@@ -1,0 +1,12 @@
+[DEFAULT]
+# Ban hosts for 1 hour after 5 failures within 10 minutes
+bantime   = 1h
+findtime  = 10m
+maxretry  = 5
+
+# Override for SSH
+[sshd]
+enabled = true
+port    = ssh
+logpath = %(sshd_log)s
+backend = %(sshd_backend)s
