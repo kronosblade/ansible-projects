@@ -1,0 +1,8 @@
+---
+galaxy_info:
+  role_name: security
+  description: Security hardening for Debian servers (fail2ban, unattended-upgrades)
+  platforms:
+    - name: Debian
+      versions:
+        - all
