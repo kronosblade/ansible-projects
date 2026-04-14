@@ -67,24 +67,24 @@ ansible-playbook -i hosts.ini playbooks/deploy_forgejo.yml --check
 
 Aggiorna il sistema prima del deploy:
 
-1. **Aggiorna la cache apt** — scarica gli indici aggiornati dei pacchetti da tutti i repository configurati.
-2. **Upgrade di tutti i pacchetti (dist-upgrade)** — aggiorna ogni pacchetto installato all'ultima versione disponibile, gestendo anche dipendenze nuove o rimosse.
-3. **Rimuove i pacchetti non più necessari** — elimina le dipendenze orfane, inclusi i relativi file di configurazione.
-4. **Pulisce la cache apt** — rimuove i file `.deb` obsoleti da `/var/cache/apt/archives/` per liberare spazio.
-5. **Verifica se è necessario un riavvio** — controlla `/var/run/reboot-required` e notifica l'operatore se il server necessita di un reboot.
+1. **Aggiorna la cache apt** —> scarica gli indici aggiornati dei pacchetti da tutti i repository configurati.
+2. **Upgrade di tutti i pacchetti (dist-upgrade)** —> aggiorna ogni pacchetto installato all'ultima versione disponibile, gestendo anche dipendenze nuove o rimosse.
+3. **Rimuove i pacchetti non più necessari** —> elimina le dipendenze orfane, inclusi i relativi file di configurazione.
+4. **Pulisce la cache apt** —> rimuove i file `.deb` obsoleti da `/var/cache/apt/archives/` per liberare spazio.
+5. **Verifica se è necessario un riavvio** —> controlla `/var/run/reboot-required` e notifica l'operatore se il server necessita di un reboot.
 
 ### Role: security
 
 Hardening del server tramite fail2ban e unattended-upgrades.
 
-**fail2ban** — protezione da attacchi brute-force:
+**fail2ban** protezione da attacchi brute-force:
 
-1. **Installa fail2ban** — installa il pacchetto tramite apt.
-2. **Deploya la configurazione jail.local** — copia il template `jail.local.j2` in `/etc/fail2ban/jail.local`. La configurazione di default banna un host per 1 ora dopo 5 tentativi falliti in 10 minuti. La jail SSH è abilitata.
-3. **Abilita e avvia fail2ban** — avvia il demone e lo abilita all'avvio del sistema.
-4. **Verifica lo stato** — esegue `fail2ban-client status` e mostra l'output per confermare che il servizio è attivo e le jail sono caricate.
+1. **Installa fail2ban** -> installa il pacchetto tramite apt.
+2. **Deploya la configurazione jail.local** -> copia il template `jail.local.j2` in `/etc/fail2ban/jail.local`. La configurazione di default banna un host per 1 ora dopo 5 tentativi falliti in 10 minuti. La jail SSH è abilitata.
+3. **Abilita e avvia fail2ban** -> avvia il demone e lo abilita all'avvio del sistema.
+4. **Verifica lo stato** -> esegue `fail2ban-client status` e mostra l'output per confermare che il servizio è attivo e le jail sono caricate.
 
-**unattended-upgrades** — aggiornamenti di sicurezza automatici:
+**unattended-upgrades** -> aggiornamenti di sicurezza automatici:
 
 1. **Installa unattended-upgrades** — installa il pacchetto tramite apt.
 2. **Abilita la configurazione** — esegue `dpkg-reconfigure` per attivare gli aggiornamenti automatici.
