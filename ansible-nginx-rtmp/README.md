@@ -2,7 +2,7 @@
 
 I create a Playbook Ansible to configure RTMP Nginx server on Alpine Linux.
 
-## Requisiti
+## Requirements
 
 - Ansible >= 2.14
 - Collection `community.general`: `ansible-galaxy collection install community.general`
@@ -16,7 +16,7 @@ cp group_vars/all.yml.example group_vars/all.yml
 # Edit hosts.ini and group_vars/all.yml 
 ```
 
-## Esecuzione
+## Exe
 ```bash
 ansible-playbook -i hosts.ini playbook.yml
 ```
