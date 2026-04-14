@@ -1,107 +1,107 @@
-# ansible-forgjeo — Deploy Forgejo su Debian
+# 🏗️ ansible-forgjeo — Deploy Forgejo on Debian
 
-Playbook Ansible che esegue il deploy di un'istanza [Forgejo](https://forgejo.org/) su un server remoto con Debian.
+Ansible playbook that deploys a [Forgejo](https://forgejo.org/) instance on a remote Debian server.
 
-## Struttura del Progetto
+## 📁 Project Structure
 
 ```
 ansible-forgjeo/
-├── ansible.cfg              # Configurazione Ansible
-├── hosts.ini                # File inventario
+├── ansible.cfg              # Ansible configuration
+├── hosts.ini                # Inventory file
 ├── playbooks/
-│   └── deploy_forgejo.yml   # Playbook principale
+│   └── deploy_forgejo.yml   # Main playbook
 ├── roles/
 │   ├── update/
-│   │   ├── tasks/main.yml   # Aggiornamento pacchetti apt
+│   │   ├── tasks/main.yml   # Apt package updates
 │   │   ├── handlers/main.yml
 │   │   ├── vars/main.yml
 │   │   └── meta/main.yml
 │   ├── security/
-│   │   ├── tasks/main.yml   # fail2ban e unattended-upgrades
+│   │   ├── tasks/main.yml   # fail2ban & unattended-upgrades
 │   │   ├── handlers/main.yml
 │   │   ├── templates/
 │   │   │   └── jail.local.j2
 │   │   ├── vars/main.yml
 │   │   └── meta/main.yml
 │   └── forgejo/
-│       ├── tasks/main.yml   # Installazione Forgejo e dipendenze
+│       ├── tasks/main.yml   # Forgejo binary, user, dirs & service
 │       ├── handlers/main.yml
 │       ├── vars/main.yml
 │       └── meta/main.yml
 └── README.md
 ```
 
-## Prerequisiti
+## ✅ Prerequisites
 
 - Ansible >= 2.9
-- Accesso SSH al server Debian di destinazione con privilegi root
-- Python installato sull'host di destinazione (richiesto da Ansible)
+- SSH access to the target Debian server with root privileges
+- Python installed on the target host (required by Ansible)
 
-## Setup
+## ⚙️ Setup
 
-1. Copiare l'inventario di esempio e inserire i dati del proprio server:
+1. Copy the example inventory and fill in your server details:
 
 ```bash
 cp hosts.ini.example hosts.ini
 ```
 
-2. Modificare `hosts.ini` sostituendo l'indirizzo IP, l'utente SSH, la porta e il percorso della chiave secondo la propria configurazione.
+2. Edit `hosts.ini` replacing the IP address, SSH user, port, and key path to match your configuration.
 
-## Utilizzo
+## 🚀 Usage
 
-Eseguire il playbook:
+Run the playbook:
 
 ```bash
 ansible-playbook -i hosts.ini playbooks/deploy_forgejo.yml
 ```
 
-Dry run (nessuna modifica applicata):
+Dry run (no changes applied):
 
 ```bash
 ansible-playbook -i hosts.ini playbooks/deploy_forgejo.yml --check
 ```
 
-## Cosa fa il Playbook
+## 📖 What the Playbook Does
 
-### Role: update
+### 🔄 Role: update
 
-Aggiorna il sistema prima del deploy:
+Updates the system before deployment:
 
-1. **Aggiorna la cache apt**: scarica gli indici aggiornati dei pacchetti da tutti i repository configurati.
-2. **Upgrade di tutti i pacchetti (dist-upgrade)**: aggiorna ogni pacchetto installato all'ultima versione disponibile, gestendo anche dipendenze nuove o rimosse.
-3. **Rimuove i pacchetti non più necessari**: elimina le dipendenze orfane, inclusi i relativi file di configurazione.
-4. **Pulisce la cache apt**: rimuove i file `.deb` obsoleti da `/var/cache/apt/archives/` per liberare spazio.
-5. **Verifica se è necessario un riavvio**: controlla `/var/run/reboot-required` e notifica l'operatore se il server necessita di un reboot.
+1. **Update apt cache**: downloads the latest package indexes from all configured repositories.
+2. **Upgrade all packages (dist-upgrade)**: upgrades every installed package to the latest available version, handling new or removed dependencies.
+3. **Remove unneeded packages**: purges orphaned dependencies including their configuration files.
+4. **Clean apt cache**: removes obsolete `.deb` files from `/var/cache/apt/archives/` to free disk space.
+5. **Check if reboot is required**: checks `/var/run/reboot-required` and notifies the operator if the server needs a reboot.
 
-### Role: security
+### 🛡️ Role: security
 
-Hardening del server tramite fail2ban e unattended-upgrades.
+Server hardening via fail2ban and unattended-upgrades.
 
-**fail2ban** protezione da attacchi brute-force:
+**🚫 fail2ban** — brute-force protection:
 
-1. **Installa fail2ban**: installa il pacchetto tramite apt.
-2. **Deploya la configurazione jail.local**: copia il template `jail.local.j2` in `/etc/fail2ban/jail.local`. La configurazione di default banna un host per 1 ora dopo 5 tentativi falliti in 10 minuti. La jail SSH è abilitata.
-3. **Abilita e avvia fail2ban**: avvia il demone e lo abilita all'avvio del sistema.
-4. **Verifica lo stato**: esegue `fail2ban-client status` e mostra l'output per confermare che il servizio è attivo e le jail sono caricate.
+1. **Install fail2ban**: installs the package via apt.
+2. **Deploy jail.local configuration**: copies the `jail.local.j2` template to `/etc/fail2ban/jail.local`. Default configuration bans a host for 1 hour after 5 failed attempts within 10 minutes. SSH jail is enabled.
+3. **Enable and start fail2ban**: starts the daemon and enables it at boot.
+4. **Verify status**: runs `fail2ban-client status` and displays the output to confirm the service is active and jails are loaded.
 
-**unattended-upgrades**: aggiornamenti di sicurezza automatici:
+**📦 unattended-upgrades** — automatic security updates:
 
-1. **Installa unattended-upgrades**: installa il pacchetto tramite apt.
-2. **Abilita la configurazione**: esegue `dpkg-reconfigure` per attivare gli aggiornamenti automatici.
-3. **Abilita e avvia il demone**: avvia il servizio e lo abilita all'avvio del sistema.
-4. **Verifica la configurazione**: controlla che `APT::Periodic::Unattended-Upgrade` sia attivo.
+1. **Install unattended-upgrades**: installs the package via apt.
+2. **Enable configuration**: runs `dpkg-reconfigure` to activate automatic updates.
+3. **Enable and start the daemon**: starts the service and enables it at boot.
+4. **Verify configuration**: checks that `APT::Periodic::Unattended-Upgrade` is active.
 
-### Role: forgejo
+### 🍵 Role: forgejo
 
-Installa il binario Forgejo, le sue dipendenze e prepara le directory di lavoro:
+Installs the Forgejo binary, its dependencies, and prepares the working directories and service:
 
-1. **Installa git e git-lfs**: installa i pacchetti necessari al funzionamento di Forgejo tramite apt.
-2. **Confronto versioni**: verifica se il binario esiste già e ne estrae la versione installata. Mostra il confronto tra versione installata e versione desiderata (definita in `vars/main.yml`).
-3. **Conferma interattiva**: chiede all'operatore il permesso prima di procedere al download. Il messaggio varia a seconda che si tratti di una nuova installazione, un aggiornamento o un re-download della stessa versione.
-4. **Scarica il binario Forgejo**: scarica la versione desiderata da Codeberg in `/usr/local/bin/forgejo` con `chmod 755`. Il download avviene solo se l'operatore conferma.
-5. **Verifica l'installazione**: esegue `forgejo --version` e mostra l'output.
-6. **Crea il gruppo e l'utente di sistema `git`**: utente di sistema con shell `/bin/bash` e home `/home/git`, senza password.
-7. **Crea la directory dati `/var/lib/forgejo`**: proprietà `git:git`, permessi `750`.
-8. **Crea la directory configurazione `/etc/forgejo`**: proprietà `root:git`, permessi `770`.
-9. **Scarica il servizio systemd**: scarica la unit file ufficiale da Codeberg in `/etc/systemd/system/forgejo.service` e ricarica il daemon systemd.
-10. **Abilita e avvia Forgejo**: abilita il servizio all'avvio del sistema e lo avvia.
+1. **Install git and git-lfs**: installs the packages required by Forgejo via apt.
+2. **Version comparison**: checks if the binary already exists and extracts the installed version. Displays a comparison between the installed version and the desired version (defined in `vars/main.yml`).
+3. **Interactive confirmation**: prompts the operator for permission before proceeding with the download. The message varies depending on whether it is a fresh install, an upgrade, or a re-download of the same version.
+4. **Download Forgejo binary**: downloads the desired version from Codeberg to `/usr/local/bin/forgejo` with `chmod 755`. The download only proceeds if the operator confirms.
+5. **Verify installation**: runs `forgejo --version` and displays the output.
+6. **Create `git` system group and user**: system user with `/bin/bash` shell and `/home/git` home directory, no password.
+7. **Create data directory `/var/lib/forgejo`**: ownership `git:git`, permissions `750`.
+8. **Create configuration directory `/etc/forgejo`**: ownership `root:git`, permissions `770`.
+9. **Download systemd service unit**: downloads the official unit file from Codeberg to `/etc/systemd/system/forgejo.service` and reloads the systemd daemon.
+10. **Enable and start Forgejo**: enables the service at boot and starts it.
