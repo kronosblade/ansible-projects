@@ -1,0 +1,8 @@
+---
+galaxy_info:
+  role_name: update
+  description: Update apt repositories and upgrade packages on Debian servers
+  platforms:
+    - name: Debian
+      versions:
+        - all

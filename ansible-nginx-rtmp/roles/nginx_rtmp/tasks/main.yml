@@ -1,0 +1,78 @@
+---
+- name: Update Alpine repository
+  community.general.apk:
+    update_cache: true
+
+- name: Install nginx, nginx-mod-rtmp and ffmpeg
+  community.general.apk:
+    name:
+      - nginx
+      - nginx-mod-rtmp
+      - ffmpeg
+    state: present
+
+- name: Create nginx-rtmp group
+  ansible.builtin.group:
+    name: "{{ nginx_rtmp_group }}"
+    system: true
+    state: present
+
+- name: Create nginx-rtmp user with no shell and no home
+  ansible.builtin.user:
+    name: "{{ nginx_rtmp_user }}"
+    group: "{{ nginx_rtmp_group }}"
+    system: true
+    shell: /sbin/nologin
+    create_home: false
+    state: present
+
+- name: Create HLS directory
+  ansible.builtin.file:
+    path: "{{ hls_path }}"
+    state: directory
+    owner: "{{ nginx_rtmp_user }}"
+    group: "{{ nginx_rtmp_group }}"
+    mode: "0755"
+
+- name: Create MPD directory
+  ansible.builtin.file:
+    path: "{{ mpd_path }}"
+    state: directory
+    owner: "{{ nginx_rtmp_user }}"
+    group: "{{ nginx_rtmp_group }}"
+    mode: "0755"
+
+- name: Create nginx log directory
+  ansible.builtin.file:
+    path: /var/log/nginx
+    state: directory
+    owner: "{{ nginx_rtmp_user }}"
+    group: "{{ nginx_rtmp_group }}"
+    mode: "0755"
+
+- name: Download stat.xsl for stats web page
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/arut/nginx-rtmp-module/master/stat.xsl
+    dest: /etc/nginx/stat.xsl
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy nginx main config
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart nginx
+
+- name: Add nginx to OpenRC
+  ansible.builtin.command:
+    cmd: rc-update add nginx default
+  changed_when: false
+
+- name: Start nginx via OpenRC
+  ansible.builtin.command:
+    cmd: rc-service nginx start
+  changed_when: false

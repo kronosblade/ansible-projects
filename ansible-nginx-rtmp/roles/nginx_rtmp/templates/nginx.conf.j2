@@ -1,0 +1,84 @@
+load_module /usr/lib/nginx/modules/ngx_rtmp_module.so;
+
+user {{ nginx_rtmp_user }} {{ nginx_rtmp_group }};
+worker_processes auto;
+pid /run/nginx/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+rtmp {
+    server {
+        listen {{ rtmp_port }};
+        chunk_size {{ rtmp_chunk_size }};
+
+        application {{ rtmp_app_name }} {
+            live on;
+            record off;
+
+            hls on;
+            hls_path {{ hls_path }};
+            hls_fragment {{ hls_fragment }}s;
+            hls_playlist_length {{ hls_playlist_length }}s;
+            hls_cleanup on;
+
+            dash on;
+            dash_path {{ mpd_path }};
+            dash_fragment {{ mpd_fragment }}s;
+            dash_playlist_length {{ mpd_playlist_length }}s;
+            dash_cleanup on;
+        }
+    }
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    sendfile        on;
+    keepalive_timeout 65;
+
+    access_log /var/log/nginx/access.log;
+    error_log  /var/log/nginx/error.log warn;
+
+    server {
+        listen {{ http_port }};
+        server_name localhost;
+
+        location /hls {
+            types {
+                application/vnd.apple.mpegurl m3u8;
+                video/mp2t ts;
+            }
+            root /tmp;
+            add_header Cache-Control no-cache;
+            add_header Access-Control-Allow-Origin *;
+        }
+
+        location /mpd {
+            types {
+                application/dash+xml mpd;
+            }
+            root /tmp;
+            add_header Cache-Control no-cache;
+            add_header Access-Control-Allow-Origin *;
+        }
+
+{% if stat_enabled %}
+        location /stat {
+            rtmp_stat all;
+            rtmp_stat_stylesheet stat.xsl;
+        }
+
+        location /stat.xsl {
+            root /etc/nginx;
+        }
+{% endif %}
+
+        location /health {
+            return 200 'ok';
+            add_header Content-Type text/plain;
+        }
+    }
+}

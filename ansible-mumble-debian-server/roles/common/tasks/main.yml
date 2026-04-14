@@ -1,0 +1,127 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install basic packages
+  apt:
+    name:
+      - vim
+      - curl
+      - git
+      - mumble-server
+      - unattended-upgrades
+    state: present
+
+# Tell systemd to look for new files
+- name: Force systemd to reload configs
+  systemd:
+    daemon_reload: yes
+
+# Enable Mumble Server
+- name: Ensure Mumble is enabled and started
+  systemd:
+    name: mumble-server
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+# Enable security updates on debian
+- name: Ensure unattended-upgrades is enabled and started
+  systemd:
+    name: unattended-upgrades
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+# Install fail2ban
+- name: Install fail2ban
+  apt:
+    name: fail2ban
+    state: present
+    update_cache: yes
+
+- name: Ensure Mumble log directory exists
+  file:
+    path: /var/log/mumble-server
+    state: directory
+    owner: root
+    group: adm
+    mode: '0755'
+
+- name: Ensure Mumble log file exists (prevents fail2ban crash)
+  file:
+    path: /var/log/mumble-server/mumble-server.log
+    state: touch
+    owner: root
+    group: adm
+    mode: '0644'
+    modification_time: preserve
+    access_time: preserve
+
+- name: Deploy jail.local configuration
+  template:
+    src: jail.local.j2
+    dest: /etc/fail2ban/jail.local
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart fail2ban
+
+- name: Ensure fail2ban is started and enabled
+  service:
+    name: fail2ban
+    state: started
+    enabled: yes
+
+
+# Running a service as a dedicated system user with no shell access follows the "Principle of Least Privilege"
+- name: Create Mumble system group
+  group:
+    name: mumble-server
+    state: present
+    system: yes
+
+- name: Create Mumble system user (no login)
+  user:
+    name: mumble-server
+    group: mumble-server
+    shell: /usr/sbin/nologin
+    system: yes
+    create_home: no
+    home: /var/lib/mumble-server
+    state: present
+
+- name: Ensure Mumble log directory is owned by mumble-user
+  file:
+    path: /var/log/mumble-server
+    state: directory
+    owner: mumble-server
+    group: mumble-server
+    mode: '0750'
+
+- name: Ensure Mumble log file exists with correct ownership
+  file:
+    path: /var/log/mumble-server/mumble-server.log
+    state: touch
+    owner: mumble-server
+    group: mumble-server
+    mode: '0640'
+    modification_time: preserve
+    access_time: preserve
+
+- name: Add fail2ban user to mumble-server group (if needed)
+  user:
+    name: fail2ban
+    groups: mumble-server
+    append: yes
+
+# Note: Usually, the Mumble package on Debian handles the service user,
+# but we enforce it here to be sure.
+
+- name: Enforce strict permissions on Mumble config
+  file:
+    path: /etc/mumble/mumble-server.ini
+    owner: root                                       # Only root should edit the config
+    group: mumble-server                              # The service user needs to read it
+    mode: '0640'                                      # Read-only for the service, hidden from others

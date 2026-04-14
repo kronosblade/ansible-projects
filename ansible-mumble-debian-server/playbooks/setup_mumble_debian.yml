@@ -1,0 +1,6 @@
+---
+- name: Setup Mumble Debian Server
+  hosts: debian-mumble
+  become: yes
+  roles:
+    - common

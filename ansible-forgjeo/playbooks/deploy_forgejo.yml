@@ -1,0 +1,6 @@
+---
+- name: Deploy Forgejo su Debian
+  hosts: debian
+  become: yes
+  roles:
+    - update

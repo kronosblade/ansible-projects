@@ -1,0 +1,8 @@
+---
+- name: Configura nginx-rtmp su Alpine Linux
+  hosts: rtmp_servers
+  become: true
+  gather_facts: true
+
+  roles:
+    - nginx_rtmp
