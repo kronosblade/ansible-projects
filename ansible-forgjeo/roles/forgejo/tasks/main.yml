@@ -1,8 +1,22 @@
 ---
+- name: Install git and git-lfs
+  apt:
+    name:
+      - git
+      - git-lfs
+    state: present
+
 - name: Download Forgejo binary
   get_url:
     url: "{{ forgejo_binary_url }}"
     dest: "{{ forgejo_install_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure Forgejo binary is executable
+  file:
+    path: "{{ forgejo_install_path }}"
     owner: root
     group: root
     mode: "0755"

@@ -16,11 +16,16 @@ ansible-forgjeo/
 │   │   ├── handlers/main.yml
 │   │   ├── vars/main.yml
 │   │   └── meta/main.yml
-│   └── security/
-│       ├── tasks/main.yml   # fail2ban e unattended-upgrades
+│   ├── security/
+│   │   ├── tasks/main.yml   # fail2ban e unattended-upgrades
+│   │   ├── handlers/main.yml
+│   │   ├── templates/
+│   │   │   └── jail.local.j2
+│   │   ├── vars/main.yml
+│   │   └── meta/main.yml
+│   └── forgejo/
+│       ├── tasks/main.yml   # Installazione Forgejo e dipendenze
 │       ├── handlers/main.yml
-│       ├── templates/
-│       │   └── jail.local.j2
 │       ├── vars/main.yml
 │       └── meta/main.yml
 └── README.md
@@ -85,3 +90,12 @@ Hardening del server tramite fail2ban e unattended-upgrades.
 2. **Abilita la configurazione** — esegue `dpkg-reconfigure` per attivare gli aggiornamenti automatici.
 3. **Abilita e avvia il demone** — avvia il servizio e lo abilita all'avvio del sistema.
 4. **Verifica la configurazione** — controlla che `APT::Periodic::Unattended-Upgrade` sia attivo.
+
+### Role: forgejo
+
+Installa il binario Forgejo e le sue dipendenze:
+
+1. **Installa git e git-lfs** — installa i pacchetti necessari al funzionamento di Forgejo tramite apt.
+2. **Scarica il binario Forgejo** — scarica l'ultima versione da Codeberg in `/usr/local/bin/forgejo`.
+3. **Imposta i permessi** — applica `chmod 755` al binario per garantirne l'eseguibilità.
+4. **Verifica l'installazione** — esegue `forgejo --version` e mostra l'output.
