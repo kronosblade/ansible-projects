@@ -29,3 +29,36 @@
 - name: Show Forgejo version
   debug:
     msg: "{{ forgejo_version_check.stdout }}"
+
+- name: Create git system group
+  group:
+    name: git
+    system: yes
+    state: present
+
+- name: Create git system user
+  user:
+    name: git
+    group: git
+    system: yes
+    shell: /bin/bash
+    comment: "Git Version Control"
+    home: /home/git
+    create_home: yes
+    password: "!"
+
+- name: Create Forgejo data directory
+  file:
+    path: /var/lib/forgejo
+    state: directory
+    owner: git
+    group: git
+    mode: "0750"
+
+- name: Create Forgejo configuration directory
+  file:
+    path: /etc/forgejo
+    state: directory
+    owner: root
+    group: git
+    mode: "0770"

@@ -93,9 +93,12 @@ Hardening del server tramite fail2ban e unattended-upgrades.
 
 ### Role: forgejo
 
-Installa il binario Forgejo e le sue dipendenze:
+Installa il binario Forgejo, le sue dipendenze e prepara le directory di lavoro:
 
 1. **Installa git e git-lfs** — installa i pacchetti necessari al funzionamento di Forgejo tramite apt.
 2. **Scarica il binario Forgejo** — scarica l'ultima versione da Codeberg in `/usr/local/bin/forgejo`.
 3. **Imposta i permessi** — applica `chmod 755` al binario per garantirne l'eseguibilità.
 4. **Verifica l'installazione** — esegue `forgejo --version` e mostra l'output.
+5. **Crea il gruppo e l'utente di sistema `git`** — utente di sistema con shell `/bin/bash` e home `/home/git`, senza password.
+6. **Crea la directory dati `/var/lib/forgejo`** — proprietà `git:git`, permessi `750`.
+7. **Crea la directory configurazione `/etc/forgejo`** — proprietà `root:git`, permessi `770`.
