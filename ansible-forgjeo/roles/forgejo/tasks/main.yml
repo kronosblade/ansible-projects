@@ -6,6 +6,38 @@
       - git-lfs
     state: present
 
+- name: Check if Forgejo binary exists
+  stat:
+    path: "{{ forgejo_install_path }}"
+  register: forgejo_binary
+
+- name: Get installed Forgejo version
+  command: "{{ forgejo_install_path }} --version"
+  register: forgejo_installed_version
+  changed_when: false
+  when: forgejo_binary.stat.exists
+
+- name: Extract installed version number
+  set_fact:
+    forgejo_current_version: "{{ forgejo_installed_version.stdout | regex_search('([0-9]+\\.[0-9]+\\.[0-9]+)') }}"
+  when: forgejo_binary.stat.exists
+
+- name: Show version comparison
+  debug:
+    msg: "Versione installata: {{ forgejo_current_version | default('nessuna') }} — Versione desiderata: {{ forgejo_version }}"
+
+- name: Confirm Forgejo download
+  pause:
+    prompt: >-
+      {% if forgejo_binary.stat.exists and forgejo_current_version == forgejo_version %}
+      Forgejo {{ forgejo_version }} è già installato. Vuoi riscaricare il binario? (yes/no)
+      {% elif forgejo_binary.stat.exists %}
+      Forgejo verrà aggiornato da {{ forgejo_current_version }} a {{ forgejo_version }}. Procedere? (yes/no)
+      {% else %}
+      Forgejo {{ forgejo_version }} verrà installato. Procedere? (yes/no)
+      {% endif %}
+  register: forgejo_confirm
+
 - name: Download Forgejo binary
   get_url:
     url: "{{ forgejo_binary_url }}"
@@ -13,6 +45,8 @@
     owner: root
     group: root
     mode: "0755"
+    force: yes
+  when: forgejo_confirm.user_input | lower == "yes"
 
 - name: Ensure Forgejo binary is executable
   file:
@@ -20,15 +54,18 @@
     owner: root
     group: root
     mode: "0755"
+  when: forgejo_confirm.user_input | lower == "yes"
 
 - name: Verify Forgejo binary
   command: "{{ forgejo_install_path }} --version"
   register: forgejo_version_check
   changed_when: false
+  when: forgejo_binary.stat.exists or forgejo_confirm.user_input | lower == "yes"
 
 - name: Show Forgejo version
   debug:
     msg: "{{ forgejo_version_check.stdout }}"
+  when: forgejo_version_check is not skipped
 
 - name: Create git system group
   group:

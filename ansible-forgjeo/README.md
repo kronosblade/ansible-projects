@@ -96,9 +96,10 @@ Hardening del server tramite fail2ban e unattended-upgrades.
 Installa il binario Forgejo, le sue dipendenze e prepara le directory di lavoro:
 
 1. **Installa git e git-lfs** — installa i pacchetti necessari al funzionamento di Forgejo tramite apt.
-2. **Scarica il binario Forgejo** — scarica l'ultima versione da Codeberg in `/usr/local/bin/forgejo`.
-3. **Imposta i permessi** — applica `chmod 755` al binario per garantirne l'eseguibilità.
-4. **Verifica l'installazione** — esegue `forgejo --version` e mostra l'output.
-5. **Crea il gruppo e l'utente di sistema `git`** — utente di sistema con shell `/bin/bash` e home `/home/git`, senza password.
-6. **Crea la directory dati `/var/lib/forgejo`** — proprietà `git:git`, permessi `750`.
-7. **Crea la directory configurazione `/etc/forgejo`** — proprietà `root:git`, permessi `770`.
+2. **Confronto versioni** — verifica se il binario esiste già e ne estrae la versione installata. Mostra il confronto tra versione installata e versione desiderata (definita in `vars/main.yml`).
+3. **Conferma interattiva** — chiede all'operatore il permesso prima di procedere al download. Il messaggio varia a seconda che si tratti di una nuova installazione, un aggiornamento o un re-download della stessa versione.
+4. **Scarica il binario Forgejo** — scarica la versione desiderata da Codeberg in `/usr/local/bin/forgejo` con `chmod 755`. Il download avviene solo se l'operatore conferma.
+5. **Verifica l'installazione** — esegue `forgejo --version` e mostra l'output.
+6. **Crea il gruppo e l'utente di sistema `git`** — utente di sistema con shell `/bin/bash` e home `/home/git`, senza password.
+7. **Crea la directory dati `/var/lib/forgejo`** — proprietà `git:git`, permessi `750`.
+8. **Crea la directory configurazione `/etc/forgejo`** — proprietà `root:git`, permessi `770`.
