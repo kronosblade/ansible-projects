@@ -99,3 +99,18 @@
     owner: root
     group: git
     mode: "0770"
+
+- name: Download Forgejo systemd service unit
+  get_url:
+    url: "{{ forgejo_service_url }}"
+    dest: /etc/systemd/system/forgejo.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd
+
+- name: Enable and start Forgejo service
+  service:
+    name: forgejo
+    state: started
+    enabled: yes

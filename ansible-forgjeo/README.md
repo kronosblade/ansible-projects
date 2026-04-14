@@ -103,3 +103,5 @@ Installa il binario Forgejo, le sue dipendenze e prepara le directory di lavoro:
 6. **Crea il gruppo e l'utente di sistema `git`**: utente di sistema con shell `/bin/bash` e home `/home/git`, senza password.
 7. **Crea la directory dati `/var/lib/forgejo`**: proprietà `git:git`, permessi `750`.
 8. **Crea la directory configurazione `/etc/forgejo`**: proprietà `root:git`, permessi `770`.
+9. **Scarica il servizio systemd**: scarica la unit file ufficiale da Codeberg in `/etc/systemd/system/forgejo.service` e ricarica il daemon systemd.
+10. **Abilita e avvia Forgejo**: abilita il servizio all'avvio del sistema e lo avvia.
