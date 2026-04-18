@@ -1,33 +1,55 @@
 load_module /usr/lib/nginx/modules/ngx_rtmp_module.so;
 
 user {{ nginx_rtmp_user }} {{ nginx_rtmp_group }};
-worker_processes auto;
+worker_processes 1;
 pid /run/nginx/nginx.pid;
 
 events {
-    worker_connections 1024;
+    worker_connections 256;
+    multi_accept on;
+    use epoll;
 }
 
 rtmp {
     server {
         listen {{ rtmp_port }};
         chunk_size {{ rtmp_chunk_size }};
+        ping 30s;
+        ping_timeout 10s;
 
         application {{ rtmp_app_name }} {
             live on;
             record off;
 
+            sync 10ms;
+            wait_key on;
+            wait_video on;
+            drop_idle_publisher 10s;
+            idle_streams off;
+
+{% if rtmp_allow_cidr %}
+            allow publish {{ rtmp_allow_cidr }};
+            deny publish all;
+            allow play {{ rtmp_allow_cidr }};
+            deny play all;
+{% endif %}
+
+{% if hls_enabled %}
             hls on;
             hls_path {{ hls_path }};
             hls_fragment {{ hls_fragment }}s;
             hls_playlist_length {{ hls_playlist_length }}s;
+            hls_continuous on;
             hls_cleanup on;
+{% endif %}
 
+{% if dash_enabled %}
             dash on;
-            dash_path {{ mpd_path }};
-            dash_fragment {{ mpd_fragment }}s;
-            dash_playlist_length {{ mpd_playlist_length }}s;
+            dash_path {{ dash_path }};
+            dash_fragment {{ dash_fragment }}s;
+            dash_playlist_length {{ dash_playlist_length }}s;
             dash_cleanup on;
+{% endif %}
         }
     }
 }
@@ -36,8 +58,10 @@ http {
     include       /etc/nginx/mime.types;
     default_type  application/octet-stream;
 
-    sendfile        on;
-    keepalive_timeout 65;
+    sendfile          on;
+    tcp_nodelay       on;
+    tcp_nopush        off;
+    keepalive_timeout 30;
 
     access_log /var/log/nginx/access.log;
     error_log  /var/log/nginx/error.log warn;
@@ -46,24 +70,30 @@ http {
         listen {{ http_port }};
         server_name localhost;
 
+{% if hls_enabled %}
         location /hls {
             types {
                 application/vnd.apple.mpegurl m3u8;
                 video/mp2t ts;
             }
             root /tmp;
+            access_log off;
             add_header Cache-Control no-cache;
             add_header Access-Control-Allow-Origin *;
         }
+{% endif %}
 
-        location /mpd {
+{% if dash_enabled %}
+        location /dash {
             types {
                 application/dash+xml mpd;
             }
             root /tmp;
+            access_log off;
             add_header Cache-Control no-cache;
             add_header Access-Control-Allow-Origin *;
         }
+{% endif %}
 
 {% if stat_enabled %}
         location /stat {

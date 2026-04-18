@@ -3,10 +3,11 @@ nginx_rtmp_group: nginx-rtmp
 rtmp_port: 1935
 http_port: 80
 rtmp_app_name: YOUR_APP_NAME
-rtmp_chunk_size: 4096
-hls_fragment: 3
-hls_playlist_length: 60
-mpd_fragment: 5
-mpd_playlist_length: 120
+rtmp_chunk_size: 8192
+rtmp_allow_cidr: 192.168.0.0/24
+hls_enabled: true
+hls_fragment: 2
+hls_playlist_length: 10
+dash_enabled: false
 stat_enabled: true
 ansible_service_mgr: openrc
